@@ -202,6 +202,10 @@ def solve_from_document(
 ) -> tuple[ParseArtifacts, SolveArtifacts]:
     """
     문제 파일을 Document Parse로 읽고, 그 결과를 바탕으로 ICAC 답안을 생성한다.
+
+    실전 개선:
+    - parsed_text를 problem_text와 parsed_reference에 중복 투입하지 않는다.
+    - 긴 PDF 문제에서 토큰 낭비와 답안 품질 저하를 줄인다.
     """
     parse_artifacts = parse_and_save(
         config=config,
@@ -209,11 +213,11 @@ def solve_from_document(
         ocr=ocr,
     )
 
-    parsed_text = parse_artifacts.markdown
+    parsed_text = parse_artifacts.markdown.strip()
 
     problem_text = f"""
-아래는 ICAC 예선 문제 또는 참고 문서를 Document Parse로 추출한 내용이다.
-이 문서를 문제 원문으로 보고, 제출 가능한 답안을 작성해라.
+아래는 ICAC 예선 문제 문서를 Document Parse로 추출한 내용이다.
+이 내용을 문제 원문으로 보고, 제출 가능한 답안을 작성해라.
 
 [Document Parse 결과]
 {parsed_text}
@@ -226,7 +230,7 @@ def solve_from_document(
         config=config,
         clients=clients,
         problem_text=problem_text,
-        parsed_reference=parsed_text,
+        parsed_reference=None,
         parsed_markdown_path=parse_artifacts.markdown_path,
         make_json=True,
     )

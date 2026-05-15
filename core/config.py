@@ -76,7 +76,7 @@ def load_config() -> AppConfig:
         document_parse_model=os.getenv("DOCUMENT_PARSE_MODEL", "document-parse"),
         document_parse_output_formats=os.getenv(
             "DOCUMENT_PARSE_OUTPUT_FORMATS",
-            "['markdown', 'html']",
+            '["markdown", "html"]',
         ),
         request_timeout_sec=int(os.getenv("REQUEST_TIMEOUT_SEC", "300")),
         solar_retries=int(os.getenv("SOLAR_RETRIES", "2")),
