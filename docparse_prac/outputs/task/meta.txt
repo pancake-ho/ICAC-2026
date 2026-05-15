@@ -1,0 +1,33 @@
+[Document Parse Practice Result]
+created_at: 2026-05-16 01:00:55
+source_file: /home/pancake_ho/icac/docparse_prac/samples/ghost_text/task.pdf
+raw_json: /home/pancake_ho/icac/docparse_prac/outputs/task/raw_response.json
+markdown: /home/pancake_ho/icac/docparse_prac/outputs/task/parsed.md
+html: /home/pancake_ho/icac/docparse_prac/outputs/task/parsed.html
+
+[Markdown Preview]
+# 과제 지시서
+
+# 과제명 : 생성형 AI와 교육환경의 변화
+
+최근 생성형 인공지능(Generative AI)의 급속한 발전은 단순한 기술적 진보를 넘어, 우리가 지식을 습득하고
+활용하는 방식 전반에 근본적인 변화를 일으키고 있습니다. 특히 대형 언어모델 기반의 다양한 도구들이
+등장하면서, 학생들은 더 이상 단순히 정보를 ʻ찾는’ 존재가 아니라, AI와 상호작용하며 지식을 ʻ구성하는’ 존재로
+변화하고 있습니다. 이러한 흐름은 교육의 목표, 학습 방식, 평가 기준에 이르기까지 기존의 틀을 재검토할
+필요성을 제기하고 있습니다.
+
+과거의 교육이 지식의 축적과 암기에 초점을 맞추었다면, 오늘날의 교육은 정보의 해석, 비판적 사고, 문제 해결
+능력과 같은 고차원적 역량을 요구하고 있습니다. 생성형 AI는 이러한 변화의 촉진제 역할을 하면서도, 동시에
+학습자의 의존성 증가, 창의성 저하, 평가의 공정성 문제 등 새로운 과제를 함께 제시하고 있습니다. 따라서 본
+과제는 단순히 기술을 소개하거나 장단점을 나열하는 데 그치지 않고, 변화하는 교육 환경 속에서 우리가 어떤
+방향으로 나아가야 하는지에 대한 깊이 있는 성찰을 요구합니다.
+
+이에 따라 학생 여러분들은 다음의 주제를 참고하거나 자신만의 주제를 중심으로 자신의 생각을 체계적으로
+정리하여 서술하시기 바랍니다.
+
+# [작성 주제 예시]
+
+- 1. 생성형 AI의 개념과 핵심 특징에 대한 설명
+- 2. 생성형 AI가 현재 교육환경(수업 방식, 과제 수행, 평가 방식 등)에 미치는 영향 분석
+- 3. 생성형 AI 활용의 긍정적 측면과 부정적 측면에 대한 균형 잡힌 고찰
+- 4
