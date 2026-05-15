@@ -77,7 +77,7 @@ def build_parser() -> argparse.ArgumentParser:
     solve_doc_parser.add_argument(
         "--instruction",
         default=None,
-        help="추가 지시문. 예: 'Django 백엔드 구현 가능성을 강조해줘'",
+        help="추가 지시문. 예: 'Django 백엔드와 DB 구현 가능성을 강조해줘'",
     )
 
     return parser

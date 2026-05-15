@@ -1,62 +1,125 @@
 from __future__ import annotations
 
-import os
+import json
+import re
+from datetime import datetime
 from pathlib import Path
-from dataclasses import dataclass
-from dotenv import load_dotenv
+from typing import Any
 
 
-@dataclass(frozen=True)
-class AppConfig:
-    root_dir: Path
-    inputs_dir: Path
-    outputs_dir: Path
-
-    upstage_api_key: str
-    upstage_base_url: str
-
-    solar_model: str
-    document_parse_url: str
-    document_parse_model: str
-    document_parse_output_formats: str
-
-    request_timeout_sec: int
-
-
-def load_config() -> AppConfig:
+def ensure_dir(path: Path) -> None:
     """
-    프로젝트 루트의 .env를 기준으로 환경변수를 읽는다.
-
-    실전에서는 run_icac.py를 루트에서 실행한다고 가정한다.
-    그래도 어느 위치에서 실행하더라도 동작하도록 파일 위치 기준 root를 계산한다.
+    디렉터리가 없으면 생성한다.
     """
-    root_dir = Path(__file__).resolve().parent.parent
+    path.mkdir(parents=True, exist_ok=True)
 
-    # 루트 .env 우선 로드
-    load_dotenv(root_dir / ".env")
 
-    api_key = os.getenv("ICAC_KEY")
-    if not api_key:
-        raise RuntimeError(
-            "ICAC_KEY가 없습니다. 프로젝트 루트에 .env 파일을 만들고 "
-            "ICAC_KEY=발급받은_KEY 형식으로 저장하세요."
-        )
+def now_string() -> str:
+    """
+    사람이 읽기 쉬운 현재 시각 문자열.
+    """
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    return AppConfig(
-        root_dir=root_dir,
-        inputs_dir=root_dir / "inputs",
-        outputs_dir=root_dir / "outputs",
-        upstage_api_key=api_key,
-        upstage_base_url="https://api.upstage.ai/v1",
-        solar_model=os.getenv("SOLAR_MODEL", "solar-pro3"),
-        document_parse_url=os.getenv(
-            "DOCUMENT_PARSE_URL",
-            "https://api.upstage.ai/v1/document-digitization",
-        ),
-        document_parse_model=os.getenv("DOCUMENT_PARSE_MODEL", "document-parse"),
-        document_parse_output_formats=os.getenv(
-            "DOCUMENT_PARSE_OUTPUT_FORMATS",
-            "['markdown', 'html']",
-        ),
-        request_timeout_sec=int(os.getenv("REQUEST_TIMEOUT_SEC", "300")),
+
+def now_compact() -> str:
+    """
+    outputs/solve/{실행시각}/ 폴더명에 쓰기 좋은 현재 시각 문자열.
+    """
+    return datetime.now().strftime("%Y%m%d_%H%M%S")
+
+
+def safe_stem(file_path: Path) -> str:
+    """
+    파일 이름에서 확장자를 제거하고 저장용으로 안전한 이름을 만든다.
+
+    예:
+        campus notice.pdf -> campus_notice
+        문제지(최종).pdf -> 문제지최종
+    """
+    stem = file_path.stem.strip()
+    stem = re.sub(r"\s+", "_", stem)
+    stem = re.sub(r"[^0-9a-zA-Z가-힣_\-]", "", stem)
+    return stem or "document"
+
+
+def save_text(path: Path, text: str) -> None:
+    """
+    UTF-8 텍스트 파일 저장.
+    """
+    ensure_dir(path.parent)
+    path.write_text(text, encoding="utf-8")
+
+
+def save_json(path: Path, data: dict[str, Any]) -> None:
+    """
+    JSON 파일 저장.
+    """
+    ensure_dir(path.parent)
+    path.write_text(
+        json.dumps(data, ensure_ascii=False, indent=2),
+        encoding="utf-8",
     )
+
+
+def load_text(path: Path) -> str:
+    """
+    UTF-8 텍스트 파일 읽기.
+    """
+    if not path.exists():
+        raise FileNotFoundError(f"파일이 존재하지 않습니다: {path}")
+
+    if not path.is_file():
+        raise ValueError(f"파일이 아닙니다: {path}")
+
+    return path.read_text(encoding="utf-8")
+
+
+def preview_text(text: str, max_chars: int = 1200) -> str:
+    """
+    긴 텍스트 미리보기.
+    """
+    text = text.strip()
+
+    if len(text) <= max_chars:
+        return text
+
+    return text[:max_chars] + "\n\n...[preview truncated]..."
+
+
+def extract_json_from_text(text: str) -> dict[str, Any] | None:
+    """
+    모델 출력에서 JSON을 최대한 안전하게 추출한다.
+
+    처리 가능한 형태:
+    1. 순수 JSON
+    2. ```json ... ``` 코드블록
+    3. 앞뒤 설명이 붙고 중간에 JSON 객체가 포함된 경우
+    """
+    raw = text.strip()
+
+    if raw.startswith("```"):
+        raw = re.sub(r"^```(?:json)?", "", raw).strip()
+        raw = re.sub(r"```$", "", raw).strip()
+
+    try:
+        parsed = json.loads(raw)
+        if isinstance(parsed, dict):
+            return parsed
+        return None
+    except json.JSONDecodeError:
+        pass
+
+    start = raw.find("{")
+    end = raw.rfind("}")
+
+    if start != -1 and end != -1 and end > start:
+        candidate = raw[start : end + 1]
+        try:
+            parsed = json.loads(candidate)
+            if isinstance(parsed, dict):
+                return parsed
+            return None
+        except json.JSONDecodeError:
+            return None
+
+    return None
