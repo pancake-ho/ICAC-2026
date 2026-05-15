@@ -25,7 +25,7 @@ ICAC 2026 예선 대비용 Upstage API 실전 파이프라인입니다.
 ```text
 ICAC-2026/
 ├── docparse_prac/              # 기존 Document Parse 연습용 코드
-├── icac_core/                  # 실전용 핵심 코드
+├── core/                  # 실전용 핵심 코드
 │   ├── __init__.py
 │   ├── config.py
 │   ├── upstage_client.py
