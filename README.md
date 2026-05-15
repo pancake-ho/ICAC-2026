@@ -63,14 +63,6 @@ pip install -r requirements.txt
 ICAC_KEY=your_upstage_api_key_here
 ```
 
-`.env.example`을 복사해서 사용할 수 있습니다.
-
-```bash
-cp .env.example .env
-```
-
-실제 API Key가 들어간 `.env` 파일은 GitHub에 올리면 안 됩니다.
-
 ## 사용법
 
 ### 1. 문서 파싱
@@ -78,13 +70,13 @@ cp .env.example .env
 PDF 또는 이미지 문서를 Document Parse로 구조화합니다.
 
 ```bash
-python3 run_icac.py parse --file inputs/problem.pdf
+python3 core/run_icac.py parse --file inputs/problem.pdf
 ```
 
 스캔본 또는 이미지 문서라면 OCR을 강제할 수 있습니다.
 
 ```bash
-python3 run_icac.py parse --file inputs/problem.png --ocr force
+python3 core/run_icac.py parse --file inputs/problem.png --ocr force
 ```
 
 ### 2. 파싱 결과 요약
@@ -92,13 +84,13 @@ python3 run_icac.py parse --file inputs/problem.png --ocr force
 이미 파싱된 `parsed.md`를 Solar Pro 3로 요약하고 ICAC 관점에서 분석합니다.
 
 ```bash
-python3 run_icac.py summary --parsed outputs/parse/problem/parsed.md
+python3 core/run_icac.py summary --parsed outputs/parse/problem/parsed.md
 ```
 
 결과를 파일로 저장하려면 `--out` 옵션을 사용합니다.
 
 ```bash
-python3 run_icac.py summary \
+python3 core/run_icac.py summary \
   --parsed outputs/parse/problem/parsed.md \
   --out outputs/summary.md
 ```
@@ -108,13 +100,13 @@ python3 run_icac.py summary \
 문제 원문이 텍스트 파일로 있을 때 사용합니다.
 
 ```bash
-python3 run_icac.py solve-text --problem inputs/problem.txt
+python3 core/run_icac.py solve-text --problem inputs/problem.txt
 ```
 
 참고 문서가 있을 경우 함께 넣을 수 있습니다.
 
 ```bash
-python3 run_icac.py solve-text \
+python3 core/run_icac.py solve-text \
   --problem inputs/problem.txt \
   --reference outputs/parse/notice/parsed.md
 ```
@@ -124,19 +116,19 @@ python3 run_icac.py solve-text \
 문제 파일이 PDF 또는 이미지일 때 가장 실전적인 방식입니다.
 
 ```bash
-python3 run_icac.py solve-doc --file inputs/problem.pdf
+python3 core/run_icac.py solve-doc --file inputs/problem.pdf
 ```
 
 스캔본 또는 이미지 문서라면 OCR을 강제합니다.
 
 ```bash
-python3 run_icac.py solve-doc --file inputs/problem.png --ocr force
+python3 core/run_icac.py solve-doc --file inputs/problem.png --ocr force
 ```
 
 추가 지시를 넣고 싶다면 `--instruction` 옵션을 사용합니다.
 
 ```bash
-python3 run_icac.py solve-doc \
+python3 core/run_icac.py solve-doc \
   --file inputs/problem.pdf \
   --instruction "Django 백엔드와 DB 구현 가능성을 강조해줘"
 ```
@@ -206,13 +198,13 @@ ICAC 예선에서 문제 파일이 제공되면 다음 순서로 진행합니다
 추천 실행 명령어는 다음과 같습니다.
 
 ```bash
-python3 run_icac.py solve-doc --file inputs/problem.pdf
+python3 core/run_icac.py solve-doc --file inputs/problem.pdf
 ```
 
 이미 문제 원문을 텍스트로 옮긴 경우에는 다음 명령어를 사용합니다.
 
 ```bash
-python3 run_icac.py solve-text --problem inputs/problem.txt
+python3 core/run_icac.py solve-text --problem inputs/problem.txt
 ```
 
 ## 제출 전 체크리스트
@@ -276,25 +268,25 @@ ICAC 예선 답안은 아래 구조를 기본으로 사용합니다.
 ### 문제 PDF를 바로 제출용 답안으로 변환
 
 ```bash
-python3 run_icac.py solve-doc --file inputs/campus_problem.pdf
+python3 core/run_icac.py solve-doc --file inputs/campus_problem.pdf
 ```
 
 ### 이미지 포스터 또는 스캔본 문제를 처리
 
 ```bash
-python3 run_icac.py solve-doc --file inputs/problem_image.png --ocr force
+python3 core/run_icac.py solve-doc --file inputs/problem_image.png --ocr force
 ```
 
 ### 텍스트 문제를 처리
 
 ```bash
-python3 run_icac.py solve-text --problem inputs/problem.txt
+python3 core/run_icac.py solve-text --problem inputs/problem.txt
 ```
 
 ### 참고 문서 기반 답안 생성
 
 ```bash
-python3 run_icac.py solve-text \
+python3 core/run_icac.py solve-text \
   --problem inputs/problem.txt \
   --reference outputs/parse/reference/parsed.md
 ```
