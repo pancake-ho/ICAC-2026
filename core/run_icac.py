@@ -1,7 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
+
+
+# python3 core/run_icac.py 형태로 직접 실행해도
+# from core.xxx import ... 이 안정적으로 동작하도록 루트 경로를 보정한다.
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 
 from core.config import load_config
 from core.docparse import parse_and_save
@@ -61,6 +70,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--reference",
         default=None,
         help="선택: 참고 문서 markdown 경로",
+    )
+    solve_text_parser.add_argument(
+        "--no-json",
+        action="store_true",
+        help="문제 분석 JSON 생성을 생략하고 바로 답안 생성",
     )
 
     solve_doc_parser = subparsers.add_parser(
@@ -131,7 +145,7 @@ def main() -> None:
             clients=clients,
             problem_text=problem_text,
             parsed_reference=reference_text,
-            make_json=True,
+            make_json=not args.no_json,
         )
 
         print("\n[ICAC 답안 생성 완료]")
@@ -139,7 +153,11 @@ def main() -> None:
         print(f"- 문제 분석 JSON: {artifacts.json_analysis_path}")
         print(f"- 초안: {artifacts.draft_answer_path}")
         print(f"- 검토: {artifacts.review_path}")
-        print(f"- 최종 후보: {artifacts.final_answer_path}")
+        print(f"- 최종 제출 후보: {artifacts.final_answer_path}")
+        print("\n[다음 행동]")
+        print(f"1) {artifacts.final_answer_path} 열기")
+        print("2) 문제 요구사항 누락 여부 확인")
+        print("3) 개인정보/과장 표현/구현 가능성 직접 검토 후 제출")
 
     elif args.command == "solve-doc":
         parse_artifacts, solve_artifacts = solve_from_document(
@@ -156,7 +174,12 @@ def main() -> None:
         print(f"- 답안 결과 폴더: {solve_artifacts.output_dir}")
         print(f"- 문제 분석 JSON: {solve_artifacts.json_analysis_path}")
         print(f"- 초안: {solve_artifacts.draft_answer_path}")
-        print(f"- 검토 및 최종 후보: {solve_artifacts.final_answer_path}")
+        print(f"- 검토: {solve_artifacts.review_path}")
+        print(f"- 최종 제출 후보: {solve_artifacts.final_answer_path}")
+        print("\n[다음 행동]")
+        print(f"1) {solve_artifacts.final_answer_path} 열기")
+        print("2) 제목/첫 문단/성과 지표/리스크 대응 확인")
+        print("3) 제출 형식에 맞춰 복붙 전 최종 다듬기")
 
     else:
         raise ValueError(f"지원하지 않는 command입니다: {args.command}")

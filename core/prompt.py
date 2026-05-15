@@ -10,6 +10,7 @@ ICAC_SYSTEM_PROMPT = """
 - 캠퍼스 문제와 실제 사용자 흐름을 명확히 연결한다.
 - 개인정보, hallucination, 운영 부담, 악성 사용 리스크를 반드시 점검한다.
 - 답안은 심사위원이 30초 안에 장점을 파악할 수 있는 구조로 작성한다.
+- 과장된 기술명 나열보다 MVP, 데이터 흐름, 운영 흐름, 검증 지표를 우선한다.
 
 기본 답안 구조:
 제목
@@ -72,7 +73,7 @@ def build_icac_answer_prompt(
 """
 
     return f"""
-다음 ICAC 예선 문제에 대해 제출 가능한 답안을 작성해라.
+다음 ICAC 예선 문제에 대해 제출 가능한 답안 초안을 작성해라.
 
 [문제]
 {problem_text}
@@ -81,9 +82,12 @@ def build_icac_answer_prompt(
 
 [작성 조건]
 - 첫 문단만 읽어도 무엇을 해결하는지 보여야 한다.
+- 문제 요구사항을 한 문장으로 재정의한다.
+- 제출물이 요구하는 형식을 확인한다.
+- 평가될 가능성이 높은 기준을 추정한다.
 - 대상 사용자를 학생, 교수, 조교, 행정직원, 유학생, 장애학생, 신입생 등으로 구체화한다.
 - AI 활용은 최소 3개 이상 구체적으로 제시한다.
-- Document Parse, Solar Pro 3, Upstage API를 사용할 수 있는 경우 실제 흐름에 맞게 녹여라.
+- Document Parse, Solar Pro 3, Upstage API를 사용할 수 있는 경우 실제 흐름에 맞게 녹인다.
 - 구현 가능성은 Django 백엔드, DB, API, 관리자 페이지 기준으로 현실적으로 작성한다.
 - 개인정보, hallucination, 편향, 운영 부담, 악성 사용 리스크를 포함한다.
 - 성과 지표는 정량 또는 준정량으로 제시한다.
@@ -92,6 +96,7 @@ def build_icac_answer_prompt(
 [출력 형식]
 제목:
 
+0. 문제 핵심 해석
 1. 문제 정의
 2. 대상 사용자
 3. 기존 문제점
@@ -114,7 +119,8 @@ def build_answer_review_prompt(answer_text: str) -> str:
 {answer_text}
 
 [검토 요청]
-심사위원 관점에서 이 답안을 냉정하게 평가하고 개선해라.
+심사위원 관점에서 이 답안을 냉정하게 평가하고 개선 방향을 제시해라.
+최종 답안 자체는 다음 단계에서 별도로 생성하므로, 여기서는 리뷰와 보강 지시만 작성한다.
 
 [검토 기준]
 1. 문제 요구사항에 직접 답했는가?
@@ -126,6 +132,7 @@ def build_answer_review_prompt(answer_text: str) -> str:
 7. 개인정보/윤리/운영 리스크가 들어갔는가?
 8. 제목과 첫 문단이 강한가?
 9. 불필요하게 긴 문장이 없는가?
+10. 심사위원이 30초 안에 장점을 파악할 수 있는가?
 
 [출력 형식]
 1. 총평
@@ -133,7 +140,63 @@ def build_answer_review_prompt(answer_text: str) -> str:
 3. 약점
 4. 반드시 수정할 부분
 5. 본선 진출 가능성을 높이는 보강안
-6. 수정된 최종 답안
+6. 최종 답안 작성 시 반드시 반영할 체크리스트
+""".strip()
+
+
+def build_final_answer_prompt(
+    problem_text: str,
+    draft_answer: str,
+    review_text: str,
+    parsed_reference: str | None = None,
+) -> str:
+    reference_block = ""
+
+    if parsed_reference:
+        reference_block = f"""
+[참고 문서 / 파싱 결과]
+{parsed_reference}
+"""
+
+    return f"""
+다음 ICAC 예선 문제에 대해 최종 제출용 답안을 작성해라.
+
+[문제]
+{problem_text}
+
+{reference_block}
+
+[초안]
+{draft_answer}
+
+[심사위원 관점 리뷰]
+{review_text}
+
+[최종 작성 지시]
+- 리뷰의 약점과 보강안을 반영해라.
+- 최종 답안에는 총평, 강점, 약점, 리뷰 설명을 넣지 마라.
+- 제출 가능한 본문만 작성해라.
+- 제목과 첫 문단을 강하게 작성해라.
+- 단순 챗봇이 아니라 캠퍼스 실제 문제 해결 흐름이 보이게 작성해라.
+- AI 활용 방식은 입력 데이터, 처리 방식, 출력 결과, 사람 검토 구조까지 구체화해라.
+- 구현 가능성은 Django 백엔드, DB 테이블, API, 관리자 페이지, MVP 범위 중심으로 작성해라.
+- 리스크와 성과 지표를 반드시 포함해라.
+- 문장은 심사위원이 빠르게 읽을 수 있도록 짧고 명확하게 쓴다.
+
+[출력 형식]
+제목:
+
+1. 문제 정의
+2. 대상 사용자
+3. 기존 문제점
+4. 제안 솔루션
+5. AI 활용 방식
+6. 시스템 흐름
+7. 구현 가능성
+8. 기대 효과
+9. 리스크 및 대응
+10. 성과 지표
+11. 결론
 """.strip()
 
 
@@ -147,11 +210,15 @@ def build_json_structure_prompt(problem_text: str) -> str:
 [JSON 스키마]
 {{
   "problem_summary": "문제 요구사항 한 문장 요약",
+  "submission_format": "요구되는 제출물 형식 또는 문서에서 확인 불가",
+  "estimated_evaluation_criteria": ["평가 기준 추정1", "평가 기준 추정2"],
   "target_users": ["대상 사용자1", "대상 사용자2"],
   "pain_points": ["현재 문제점1", "현재 문제점2"],
   "solution_one_liner": "누구의 어떤 문제를 AI로 어떻게 줄이는가",
   "ai_features": ["AI 기능1", "AI 기능2", "AI 기능3"],
+  "data_inputs": ["필요 데이터1", "필요 데이터2"],
   "mvp_scope": ["MVP 기능1", "MVP 기능2"],
+  "implementation_blocks": ["프론트엔드", "백엔드", "DB", "AI API", "관리자 페이지"],
   "risks": ["리스크1", "리스크2"],
   "metrics": ["성과 지표1", "성과 지표2"],
   "recommended_answer_structure": ["섹션1", "섹션2"]

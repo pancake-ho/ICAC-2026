@@ -198,13 +198,13 @@ ICAC 예선에서 문제 파일이 제공되면 다음 순서로 진행합니다
 추천 실행 명령어는 다음과 같습니다.
 
 ```bash
-python3 core/run_icac.py solve-doc --file inputs/problem.pdf
+python3 -m core/run_icac.py solve-doc --file inputs/problem.pdf
 ```
 
 이미 문제 원문을 텍스트로 옮긴 경우에는 다음 명령어를 사용합니다.
 
 ```bash
-python3 core/run_icac.py solve-text --problem inputs/problem.txt
+python3 -m core/run_icac.py solve-text --problem inputs/problem.txt
 ```
 
 ## 제출 전 체크리스트
@@ -268,19 +268,19 @@ ICAC 예선 답안은 아래 구조를 기본으로 사용합니다.
 ### 문제 PDF를 바로 제출용 답안으로 변환
 
 ```bash
-python3 core/run_icac.py solve-doc --file inputs/campus_problem.pdf
+python3 -m core/run_icac.py solve-doc --file inputs/campus_problem.pdf
 ```
 
 ### 이미지 포스터 또는 스캔본 문제를 처리
 
 ```bash
-python3 core/run_icac.py solve-doc --file inputs/problem_image.png --ocr force
+python3 -m core/run_icac.py solve-doc --file inputs/problem_image.png --ocr force
 ```
 
 ### 텍스트 문제를 처리
 
 ```bash
-python3 core/run_icac.py solve-text --problem inputs/problem.txt
+python3 -m core/run_icac.py solve-text --problem inputs/problem.txt
 ```
 
 ### 참고 문서 기반 답안 생성

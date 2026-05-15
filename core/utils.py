@@ -23,9 +23,12 @@ def now_string() -> str:
 
 def now_compact() -> str:
     """
-    outputs/solve/{실행시각}/ 폴더명에 쓰기 좋은 현재 시각 문자열.
+    outputs 폴더명에 쓰기 좋은 현재 시각 문자열.
+
+    초 단위만 쓰면 실전에서 연속 실행 시 폴더 충돌이 생길 수 있으므로
+    microsecond까지 포함한다.
     """
-    return datetime.now().strftime("%Y%m%d_%H%M%S")
+    return datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
 
 def safe_stem(file_path: Path) -> str:
@@ -84,6 +87,34 @@ def preview_text(text: str, max_chars: int = 1200) -> str:
         return text
 
     return text[:max_chars] + "\n\n...[preview truncated]..."
+
+
+def compact_text(text: str, max_chars: int, label: str = "text") -> str:
+    """
+    긴 문서를 Solar 입력에 넣기 전에 안전하게 압축한다.
+
+    단순 앞부분 절단만 하면 제출 조건/평가 기준이 뒤쪽에 있을 때 놓칠 수 있으므로
+    앞부분 70%, 뒷부분 30%를 보존한다.
+    """
+    text = text.strip()
+
+    if max_chars <= 0:
+        return text
+
+    if len(text) <= max_chars:
+        return text
+
+    head_len = int(max_chars * 0.7)
+    tail_len = max_chars - head_len
+
+    head = text[:head_len]
+    tail = text[-tail_len:]
+
+    return (
+        f"{head}\n\n"
+        f"...[{label} truncated: original_chars={len(text)}, max_chars={max_chars}]...\n\n"
+        f"{tail}"
+    )
 
 
 def extract_json_from_text(text: str) -> dict[str, Any] | None:
