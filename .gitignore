@@ -4,9 +4,16 @@ __pycache__/
 *.pyc
 
 outputs/
-inputs/private/
 *.log
 
 .DS_Store
 .vscode/
 .idea/
+inputs/
+docparse/
+pipeline/
+solar/
+.env
+.env.example
+solve_receipts_calc.pyc
+test_api.py
